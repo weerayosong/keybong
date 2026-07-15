@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="th">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Keybong | Typing Practice App</title>
+        <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            body {
+                font-family: "Noto Sans Thai", sans-serif;
+            }
+            .typing-font {
+                font-family: "Courier New", Courier, monospace;
+            }
+
+            .cursor-active {
+                text-decoration: underline;
+                text-decoration-thickness: 3px;
+                text-underline-offset: 6px;
+                color: #f8fafc;
+            }
+            .cursor-error {
+                background-color: #ef4444;
+                color: white;
+                text-decoration: underline;
+                text-decoration-thickness: 3px;
+                text-underline-offset: 6px;
+                border-radius: 2px;
+            }
+
+            .char-correct {
+                color: #4ade80;
+                opacity: 0.6;
+            }
+            .char-error-past {
+                color: #ef4444;
+                opacity: 0.9;
+            }
+            .char-pending {
+                color: #6b7280;
+            }
+
+            .word-container {
+                display: inline-flex;
+                margin-right: 0px;
+            }
+
+            /* Keyboard */
+            .key {
+                width: 38px;
+                height: 38px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+                background-color: #374151;
+                color: #9ca3af;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                transition: all 0.1s;
+            }
+            .key-row {
+                display: flex;
+                justify-content: center;
+                gap: 6px;
+                margin-bottom: 6px;
+            }
+            .key.target {
+                position: relative;
+                z-index: 10;
+                color: #fff;
+                background-color: #4b5563;
+            }
+            .key.target::after {
+                content: "";
+                position: absolute;
+                width: 48px;
+                height: 48px;
+                border: 2px solid #3b82f6;
+                border-radius: 50%;
+                pointer-events: none;
+            }
+            .key.pressed {
+                background-color: #1f2937;
+                transform: translateY(2px);
+                box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+            }
+            .key-space {
+                width: 240px;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-[#18181b] text-gray-300 h-screen flex flex-col overflow-hidden selection:bg-transparent min-w-[1024px]"
+    >
+        <div
+            class="bg-[#27272a] border-b border-gray-700 shadow-md z-10 px-6 py-2 flex justify-between items-center w-full"
+        >
+            <div class="flex items-center gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-400">เป้าแม่นยำ:</span>
+                    <input
+                        type="number"
+                        id="target-acc"
+                        value="95"
+                        min="50"
+                        max="100"
+                        class="bg-[#18181b] text-white px-2 py-0.5 rounded w-14 outline-none text-center border border-gray-600"
+                    />
+                    <span class="text-gray-400">%</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-400">สตรีคเป้าหมาย:</span>
+                    <input
+                        type="number"
+                        id="target-rounds"
+                        value="5"
+                        min="1"
+                        max="50"
+                        class="bg-[#18181b] text-white px-2 py-0.5 rounded w-14 outline-none text-center border border-gray-600"
+                    />
+                </div>
+                <div
+                    class="text-yellow-500 font-medium ml-2 bg-[#18181b] px-3 py-0.5 rounded border border-gray-700"
+                >
+                    🔥 สตรีค:
+                    <span id="current-streak" class="text-white">0</span>
+                </div>
+                <button
+                    id="apply-settings"
+                    class="ml-2 px-4 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs transition cursor-pointer"
+                >
+                    รีเซ็ต
+                </button>
+                <button
+                    id="toggle-sound"
+                    class="ml-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs transition cursor-pointer flex items-center gap-1"
+                >
+                    🔇 ปิดเสียง
+                </button>
+            </div>
+
+            <div
+                class="flex items-center gap-6 font-mono font-bold bg-[#18181b] px-4 py-1.5 rounded border border-gray-700"
+            >
+                <div class="text-gray-400">
+                    WPM:
+                    <span id="wpm-display" class="text-white text-lg">0</span>
+                </div>
+                <div class="text-gray-400">
+                    ACC:
+                    <span id="acc-display" class="text-white text-lg">100</span
+                    >%
+                </div>
+                <div class="text-gray-400">
+                    FOCUS:
+                    <span
+                        id="current-key-display"
+                        class="text-blue-400 text-lg uppercase shadow-blue-500/50 drop-shadow-md"
+                        >T</span
+                    >
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="bg-[#1f1f22] pt-3 pb-2 flex flex-col items-center gap-2 border-b border-gray-800 w-full"
+        >
+            <div
+                id="letters-grid"
+                class="flex gap-1.5 flex-wrap justify-center"
+            ></div>
+            <div class="text-[11px] text-gray-500 flex gap-3 mt-1">
+                <span>💡 <b>คลิกซ้าย</b> ตั้งเป้า Focus</span>
+                <span>|</span>
+                <span>🖱️ <b>คลิกขวา</b> เปิด/ปิดอักษร</span>
+                <span>|</span>
+                <span>⌨️ กด <b>ESC</b> เพื่อรีเซ็ตรอบใหม่</span>
+                <span>|</span>
+                <span class="text-blue-400"
+                    >🔥 พิมพ์ให้ถึงเป้า
+                    <span id="hint-streak">5</span> รอบติดเพื่อปลดล็อค!</span
+                >
+            </div>
+        </div>
+
+        <div class="flex-1 w-full max-w-7xl mx-auto relative flex flex-col">
+            <div class="flex-1 flex items-start justify-center pt-8 px-8">
+                <div
+                    id="typing-area"
+                    class="typing-font text-5xl leading-[1.5] tracking-[0.05em] select-none text-left w-full flex flex-wrap content-start"
+                ></div>
+            </div>
+
+            <div
+                id="keyboard-container"
+                class="pb-60 flex flex-col items-center opacity-80 hover:opacity-100 transition-opacity"
+            ></div>
+        </div>
+
+        <script src="data.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
