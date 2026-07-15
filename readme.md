@@ -1,6 +1,10 @@
 # ⌨️ Keybong - Minimalist Typing Practice for ~~Slow Typer~~ Me 🥹
 
+[Live Preview](https://keybong.vercel.app/)
+
 แอปพลิเคชันฝึกพิมพ์ที่ออกแบบและพัฒนาขึ้นมาเพื่อ **Software Developers** โดยเฉพาะ สร้างขึ้นเพื่อแก้ปัญหาการฝึกพิมพ์ด้วยคำศัพท์ทั่วไปที่ไม่ตอบโจทย์การเขียนโค้ด และลบความน่าหงุดหงิดของระบบอัลกอริทึมที่เข้มงวดเกินไปในแอปฝึกพิมพ์แบบดั้งเดิม
+
+![pandy](https://github.com/weerayosong/weerayosong.github.io/blob/main/images/mini11.png?raw=true)
 
 โปรเจกต์นี้เน้นความเรียบง่าย (Minimalist) ทำงานบนเบราว์เซอร์ 100% โดยไม่ต้องพึ่งพา Build Tools หรือ Framework ที่ซับซ้อน
 
